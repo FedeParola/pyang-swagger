@@ -291,18 +291,10 @@ def print_header(module, fd, children, git_info):
         header['info']['x-yang-path'] = os.path.abspath(str(module.pos.ref))
 
     header['schemes'] = ['http']
+    # TODO: can it be removed?
     for attribute in module.substmts:
-        if isinstance(attribute.keyword, tuple) and attribute.keyword[1] == "service-description":
-            header['info']['description'] = attribute.arg
-        elif isinstance(attribute.keyword, tuple) and attribute.keyword[1] == "service-version":
-            header['info']['version'] = attribute.arg
-        elif isinstance(attribute.keyword, tuple) and attribute.keyword[1] == "service-name":
+        if isinstance(attribute.keyword, tuple) and attribute.keyword[1] == "service-name":
             header['info']['x-service-name'] = attribute.arg
-        elif isinstance(attribute.keyword, tuple) and attribute.keyword[1] == "service-min-kernel-version":
-            if re.match(r"[1-9]{1,2}\.[0-9]{1,2}\.[0-9]{1,2}", attribute.arg):
-                header['info']['x-service-min-kernel-version'] = attribute.arg
-            else:
-                raise error.EmitError("The parameter service-min-kernel-version doesn't match the patter (e.g. x.y[.z]")
 
     # Add tags to the header to group the APIs based on every root node found in the YANG
     if len(children) > 0:
