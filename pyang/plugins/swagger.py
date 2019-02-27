@@ -288,7 +288,7 @@ def print_header(module, fd, children, git_info):
         header['info']['x-pyang-git-info'] = git_info
 
     if module.pos.ref:
-        header['info']['x-yang-path'] = str(module.pos.ref)
+        header['info']['x-yang-path'] = os.path.abspath(str(module.pos.ref))
 
     header['schemes'] = ['http']
     for attribute in module.substmts:
