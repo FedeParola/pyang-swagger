@@ -553,7 +553,7 @@ def gen_model(children, tree_structure, config=True, definitions=None):
                     node['example'] = attribute.arg
                 elif isinstance(attribute.keyword, tuple) and attribute.keyword[1] == "polycube-class":
                     node['x-inherits-from'] = attribute.arg
-                elif attribute.keyword == 'config' and attribute.arg == 'false':
+                elif attribute.keyword == 'config' and attribute.arg == 'false' or isinstance(attribute.keyword, tuple) and attribute.keyword[1] == 'init-only-config':
                     config = False
                     node['readOnly'] = True
 
@@ -957,7 +957,7 @@ def gen_api_node(node, path, apis, definitions, config=True):
     keyList = []
     for sub in node.substmts:
         # If config is False the API entry is read-only.
-        if sub.keyword == 'config' and sub.arg == 'false':
+        if sub.keyword == 'config' and sub.arg == 'false' or isinstance(sub.keyword, tuple) and sub.keyword[1] == 'init-only-config':
             config = False
         elif sub.keyword == 'key':
             keyList = str(sub.arg).split()
