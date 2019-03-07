@@ -323,6 +323,7 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
             chs = [ch for ch in module.i_children
                    if ch.keyword in (statements.data_definition_keywords + ['rpc', 'notification'])]
 
+
         if not printed_header:
             model = print_header(module, fd, chs, git_info)
             printed_header = True
@@ -368,6 +369,8 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
 
         model['definitions'] = definitions
         modulepath = "/{0}/".format(module.arg)
+        modulename = to_upper_camelcase(module.arg)
+        # TODO: why are we deleting those?
         del model['paths'][modulepath]['put']
         del model['paths'][modulepath]['delete']
         del model['paths'][modulepath]['post']
@@ -380,29 +383,42 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
         model['paths'][modulepath + '{name}/']['post']['x-has-default-impl'] = True
         model['paths'][modulepath + '{name}/']['delete']['x-has-default-impl'] = True
         model['paths'][modulepath + '{name}/']['put']['x-has-default-impl'] = True
-        model['paths'][modulepath + '{name}/uuid/']['get']['x-has-default-impl'] = True
+        model['definitions'][modulename]['properties']['name']['x-has-default-impl'] = True # TODO: now sure about this one
+        model['definitions'][modulename]['properties']['name']['x-is-cube-name'] = True # TODO: now sure about this one
 
-        # port list level?
         if modulepath + '{name}/ports/' in model['paths']:
-            model['paths'][modulepath + '{name}/ports/']['post']['x-has-default-impl'] = True
-            model['paths'][modulepath + '{name}/ports/']['put']['x-has-default-impl'] = True
-            model['paths'][modulepath + '{name}/ports/']['get']['x-has-default-impl'] = True
-            model['paths'][modulepath + '{name}/ports/']['delete']['x-has-default-impl'] = True
+            model['definitions']['Ports']['properties']['name']['x-has-default-impl'] = True # TODO: now sure about this one
 
-            # ports level
-            model['paths'][modulepath + '{name}/ports/{ports_name}/']['post']['x-has-default-impl'] = True
-            model['paths'][modulepath + '{name}/ports/{ports_name}/']['put']['x-has-default-impl'] = True
-            model['paths'][modulepath + '{name}/ports/{ports_name}/']['get']['x-has-default-impl'] = True
-            model['paths'][modulepath + '{name}/ports/{ports_name}/']['delete']['x-has-default-impl'] = True
+        # mark leafs that are part of the base datamodel
 
-            # sub-elements in port
-            model['paths'][modulepath + '{name}/ports/{ports_name}/peer/']['patch']['x-has-default-impl'] = True
-            model['paths'][modulepath + '{name}/ports/{ports_name}/peer/']['get']['x-has-default-impl'] = True
+        # definitions
+        #model['definitions'][modulename]['properties']['name']['x-is-base-datamodel'] = True # TODO: now sure about this one
+        model['definitions'][modulename]['properties']['uuid']['x-is-base-datamodel'] = True
+        model['definitions'][modulename]['properties']['type']['x-is-base-datamodel'] = True
+        model['definitions'][modulename]['properties']['loglevel']['x-is-base-datamodel'] = True
 
-            model['paths'][modulepath + '{name}/ports/{ports_name}/uuid/']['get']['x-has-default-impl'] = True
+        # ports
+        if modulepath + '{name}/ports/' in model['paths']:
+            #model['definitions'][modulename]['properties']['ports']['x-is-base-datamodel'] = True # TODO: now sure about this one
+            #model['definitions']['Ports']['properties']['name']['x-is-base-datamodel'] = True # TODO: now sure about this one
+            model['definitions']['Ports']['properties']['uuid']['x-is-base-datamodel'] = True
+            model['definitions']['Ports']['properties']['status']['x-is-base-datamodel'] = True
+            model['definitions']['Ports']['properties']['peer']['x-is-base-datamodel'] = True
 
-            model['paths'][modulepath + '{name}/ports/{ports_name}/status/']['get']['x-has-default-impl'] = True
-            # model['paths'][modulepath + '{name}/ports/{ports_name}/status/']['patch']['x-has-default-impl'] = True
+        # paths
+        # instance level
+        model['paths'][modulepath + '{name}/uuid/']['get']['x-is-base-datamodel'] = True
+        model['paths'][modulepath + '{name}/type/']['get']['x-is-base-datamodel'] = True
+        model['paths'][modulepath + '{name}/loglevel/']['get']['x-is-base-datamodel'] = True
+        model['paths'][modulepath + '{name}/loglevel/']['patch']['x-is-base-datamodel'] = True
+
+        # ports
+        if modulepath + '{name}/ports/' in model['paths']:
+            model['paths'][modulepath + '{name}/ports/{ports_name}/peer/']['patch']['x-is-base-datamodel'] = True
+            model['paths'][modulepath + '{name}/ports/{ports_name}/peer/']['get']['x-is-base-datamodel'] = True
+            model['paths'][modulepath + '{name}/ports/{ports_name}/uuid/']['get']['x-is-base-datamodel'] = True
+            model['paths'][modulepath + '{name}/ports/{ports_name}/status/']['get']['x-is-base-datamodel'] = True
+
 
         fd.write(json.dumps(model, indent=4, separators=(',', ': ')))
 
