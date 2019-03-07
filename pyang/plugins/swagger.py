@@ -391,25 +391,26 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
         model['paths'][modulepath + '{name}/uuid/']['get']['x-has-default-impl'] = True
 
         # port list level?
-        model['paths'][modulepath + '{name}/ports/']['post']['x-has-default-impl'] = True
-        model['paths'][modulepath + '{name}/ports/']['put']['x-has-default-impl'] = True
-        model['paths'][modulepath + '{name}/ports/']['get']['x-has-default-impl'] = True
-        model['paths'][modulepath + '{name}/ports/']['delete']['x-has-default-impl'] = True
+        if modulepath + '{name}/ports/' in model['paths']:
+            model['paths'][modulepath + '{name}/ports/']['post']['x-has-default-impl'] = True
+            model['paths'][modulepath + '{name}/ports/']['put']['x-has-default-impl'] = True
+            model['paths'][modulepath + '{name}/ports/']['get']['x-has-default-impl'] = True
+            model['paths'][modulepath + '{name}/ports/']['delete']['x-has-default-impl'] = True
 
-        # ports level
-        model['paths'][modulepath + '{name}/ports/{ports_name}/']['post']['x-has-default-impl'] = True
-        model['paths'][modulepath + '{name}/ports/{ports_name}/']['put']['x-has-default-impl'] = True
-        model['paths'][modulepath + '{name}/ports/{ports_name}/']['get']['x-has-default-impl'] = True
-        model['paths'][modulepath + '{name}/ports/{ports_name}/']['delete']['x-has-default-impl'] = True
+            # ports level
+            model['paths'][modulepath + '{name}/ports/{ports_name}/']['post']['x-has-default-impl'] = True
+            model['paths'][modulepath + '{name}/ports/{ports_name}/']['put']['x-has-default-impl'] = True
+            model['paths'][modulepath + '{name}/ports/{ports_name}/']['get']['x-has-default-impl'] = True
+            model['paths'][modulepath + '{name}/ports/{ports_name}/']['delete']['x-has-default-impl'] = True
 
-        # sub-elements in port
-        model['paths'][modulepath + '{name}/ports/{ports_name}/peer/']['patch']['x-has-default-impl'] = True
-        model['paths'][modulepath + '{name}/ports/{ports_name}/peer/']['get']['x-has-default-impl'] = True
+            # sub-elements in port
+            model['paths'][modulepath + '{name}/ports/{ports_name}/peer/']['patch']['x-has-default-impl'] = True
+            model['paths'][modulepath + '{name}/ports/{ports_name}/peer/']['get']['x-has-default-impl'] = True
 
-        model['paths'][modulepath + '{name}/ports/{ports_name}/uuid/']['get']['x-has-default-impl'] = True
+            model['paths'][modulepath + '{name}/ports/{ports_name}/uuid/']['get']['x-has-default-impl'] = True
 
-        model['paths'][modulepath + '{name}/ports/{ports_name}/status/']['get']['x-has-default-impl'] = True
-        # model['paths'][modulepath + '{name}/ports/{ports_name}/status/']['patch']['x-has-default-impl'] = True
+            model['paths'][modulepath + '{name}/ports/{ports_name}/status/']['get']['x-has-default-impl'] = True
+            # model['paths'][modulepath + '{name}/ports/{ports_name}/status/']['patch']['x-has-default-impl'] = True
 
         fd.write(json.dumps(model, indent=4, separators=(',', ': ')))
 
