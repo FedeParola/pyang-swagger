@@ -400,6 +400,7 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
         # ports
         if modulepath + '{name}/ports/' in model['paths']:
             #model['definitions'][modulename]['properties']['ports']['x-is-base-datamodel'] = True # TODO: now sure about this one
+            model['definitions'][modulename]['properties']['ports']['x-is-port-class'] = True
             #model['definitions']['Ports']['properties']['name']['x-is-base-datamodel'] = True # TODO: now sure about this one
             model['definitions']['Ports']['properties']['uuid']['x-is-base-datamodel'] = True
             model['definitions']['Ports']['properties']['status']['x-is-base-datamodel'] = True
