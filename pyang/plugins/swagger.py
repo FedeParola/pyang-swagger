@@ -1,8 +1,10 @@
 """Swagger output plugin for pyang.
 
     List of contributors:
-    -Sebastiano Miano, Computer Networks Group (Netgorup), Politecnico di Torino
+    -Sebastiano Miano, Computer Networks Group (Netgroup), Politecnico di Torino
     [sebastiano.miano@polito.it]
+    -Mauricio Vásquez Bernal, Computer Networks Group (Netgroup), Politecnico di Torino
+    [mauriciovasquezbernal@gmail.com]
     -Arturo Mayoral, Optical Networks & Systems group, Centre Tecnologic de Telecomunicacions de Catalunya (CTTC).
     [arturo.mayoral@cttc.es]
     -Ricard Vilalta, Optical Networks & Systems group, Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
@@ -828,6 +830,7 @@ def generate_yang_lib_api():
     get['consumes'] = []
     get['operationId'] = to_upper_camelcase('read' + _ROOT_NODE_NAME + 'LibraryVersion')
     get['tags'] = [_ROOT_NODE_NAME]
+    # RESTCONF responses: https://tools.ietf.org/html/rfc7231#section-6
     get['responses'] = {
         '200': {'description': 'OK: Successful operation'},
         '400': {'description': 'Bad request'},
@@ -1090,7 +1093,8 @@ def print_rpc(node, schema_in, path, definitions, schema_out):
 
     schema_list = list(parent_set)
 
-    operations['post'] = generate_create(node, schema_in, path, definitions, schema_list, rpc=schema_out)
+    operations['post'] = generate_create(node, schema_in, path, definitions, schema_list, is_rpc=True, rpc=schema_out)
+    operations['post']['x-is-yang-action'] = True
     return operations
 
 
@@ -1145,7 +1149,7 @@ def get_input_path_parameters(path):
 
 
 # CREATE
-def generate_create(stmt, schema, path, definitions, schema_list, rpc=None, is_list=False):
+def generate_create(stmt, schema, path, definitions, schema_list, rpc=None, is_list=False, is_rpc=False):
     """ Generates the create function definitions."""
     path_params = None
     if path:
@@ -1163,15 +1167,16 @@ def generate_create(stmt, schema, path, definitions, schema_list, rpc=None, is_l
     else:
         if not post['parameters']:
             del post['parameters']
-    # Responses
-    if rpc:
+    # RESTCONF responses: https://tools.ietf.org/html/rfc7231#section-6
+    if is_rpc:
         response = {
             '200': {'description': 'OK: Successful operation'},
             '204': {'description': 'No content: Successful operation'},
             '403': {'description': 'Forbidden: User not authorized'},
-            '404': {'description': 'Operation not found'}
+            '404': {'description': 'Not found: Operation not found'}
         }
-        response['200']['schema'] = rpc
+        if rpc:
+            response['200']['schema'] = rpc
     else:
         response = {
             '201': {'description': 'Created: Successful operation'},
@@ -1196,7 +1201,7 @@ def generate_retrieve(stmt, schema, path, definitions, schema_list, is_list=Fals
     if path:
         get['parameters'] = create_parameter_list(path_params, schema, definitions, schema_list)
 
-    # Responses
+    # RESTCONF responses: https://tools.ietf.org/html/rfc7231#section-6
     response = {
         '200': {'description': 'OK: Successful operation'},
         '400': {'description': 'Bad request'},
@@ -1232,12 +1237,12 @@ def generate_update(stmt, schema, path, definitions, schema_list, is_list=False)
     else:
         if not patch['parameters']:
             del patch['parameters']
-    # Responses
+    # RESTCONF responses: https://tools.ietf.org/html/rfc7231#section-6
     response = {
         '200': {'description': 'OK: Successful update'},
         '204': {'description': 'No content: Successful update'},
         '403': {'description': 'Forbidden: User not authorized'},
-        '404': {'description': 'Resource not found'}
+        '404': {'description': 'Not found: Resource not found'}
     }
 
     patch['responses'] = response
@@ -1265,6 +1270,7 @@ def generate_replace(stmt, schema, path, definitions, schema_list, is_list=False
         if not put['parameters']:
             del put['parameters']
 
+    # RESTCONF responses: https://tools.ietf.org/html/rfc7231#section-6
     response = {
         '201': {'description': 'OK: Resource replaced successfully'},
         '204': {'description': 'No content: Resource modified successfully'},
@@ -1285,7 +1291,7 @@ def generate_delete(stmt, ref, path, definitions, schema_list, is_list=False):
     if path_params:
         delete['parameters'] = create_parameter_list(path_params, ref, definitions, schema_list)
 
-    # Responses
+    # RESTCONF responses: https://tools.ietf.org/html/rfc7231#section-6
     response = {
         '204': {'description': 'No content: Resource deleted'},
         '403': {'description': 'Forbidden: User not authorized'},
@@ -1406,9 +1412,10 @@ def create_body_dict(name, schema):
 
 def create_responses(name, schema=None):
     """ Create generic responses based on the name and an optional schema."""
+    # RESTCONF responses: https://tools.ietf.org/html/rfc7231#section-6
     response = {
-        '200': {'description': 'Successful operation'},
-        '400': {'description': 'Internal Error'}
+        '200': {'description': 'OK: Successful operation'},
+        '400': {'description': 'Bad request: Internal Error'}
     }
     if schema:
         response['200']['schema'] = schema
