@@ -424,6 +424,13 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
             model['paths'][modulepath + '{name}/ports/{ports_name}/uuid/']['get']['x-is-base-datamodel'] = True
             model['paths'][modulepath + '{name}/ports/{ports_name}/status/']['get']['x-is-base-datamodel'] = True
 
+        # check if module is transparent or not
+        # TODO: I haven't been able to implement this in a clever way, for some
+        # reason I am not able to detect the "uses" statements in pyang
+        if modulepath + '{name}/ports/' in model['paths']:
+            model['definitions'][modulename]['x-is-standard'] = True
+        else:
+            model['definitions'][modulename]['x-is-transparent'] = True
 
         fd.write(json.dumps(model, indent=4, separators=(',', ': ')))
 
