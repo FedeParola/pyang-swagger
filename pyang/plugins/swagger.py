@@ -399,6 +399,8 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
         model['definitions'][modulename]['properties']['type']['x-is-base-datamodel'] = True
         model['definitions'][modulename]['properties']['loglevel']['x-is-base-datamodel'] = True
         model['definitions'][modulename]['properties']['service-name']['x-is-base-datamodel'] = True
+        model['definitions'][modulename]['properties']['shadow']['x-is-base-datamodel'] = True
+        model['definitions'][modulename]['properties']['span']['x-is-base-datamodel'] = True
 
         # ports
         if modulepath + '{name}/ports/' in model['paths']:
@@ -408,6 +410,7 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
             model['definitions']['Ports']['properties']['uuid']['x-is-base-datamodel'] = True
             model['definitions']['Ports']['properties']['status']['x-is-base-datamodel'] = True
             model['definitions']['Ports']['properties']['peer']['x-is-base-datamodel'] = True
+            model['definitions']['Ports']['properties']['tcubes']['x-is-base-datamodel'] = True
 
         # paths
         # instance level
@@ -416,6 +419,9 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
         model['paths'][modulepath + '{name}/loglevel/']['get']['x-is-base-datamodel'] = True
         model['paths'][modulepath + '{name}/loglevel/']['patch']['x-is-base-datamodel'] = True
         model['paths'][modulepath + '{name}/service-name/']['get']['x-is-base-datamodel'] = True
+        model['paths'][modulepath + '{name}/shadow/']['get']['x-is-base-datamodel'] = True
+        model['paths'][modulepath + '{name}/span/']['get']['x-is-base-datamodel'] = True
+        model['paths'][modulepath + '{name}/span/']['patch']['x-is-base-datamodel'] = True
 
         # ports
         if modulepath + '{name}/ports/' in model['paths']:
@@ -423,6 +429,8 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
             model['paths'][modulepath + '{name}/ports/{ports_name}/peer/']['get']['x-is-base-datamodel'] = True
             model['paths'][modulepath + '{name}/ports/{ports_name}/uuid/']['get']['x-is-base-datamodel'] = True
             model['paths'][modulepath + '{name}/ports/{ports_name}/status/']['get']['x-is-base-datamodel'] = True
+            # code generation is not genering endpoints for list leafs, to this call fails at this point
+            #model['paths'][modulepath + '{name}/ports/{ports_name}/tcubes/']['get']['x-is-base-datamodel'] = True
 
         # check if module is transparent or not
         # TODO: I haven't been able to implement this in a clever way, for some
