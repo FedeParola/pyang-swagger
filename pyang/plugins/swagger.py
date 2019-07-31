@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Swagger output plugin for pyang.
 
     List of contributors:
@@ -377,6 +378,17 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
         del model['paths'][modulepath]['delete']
         del model['paths'][modulepath]['post']
 
+        # check if module is transparent or not
+        # TODO: I haven't been able to implement this in a clever way, for some
+        # reason I am not able to detect the "uses" statements in pyang
+        transparent = False
+        if modulepath + '{name}/ports/' in model['paths']:
+            model['definitions'][modulename]['x-is-standard'] = True
+            transparent = False
+        else:
+            model['definitions'][modulename]['x-is-transparent'] = True
+            transparent = True
+
         # mark methods that have a default implementation
         # service level
         model['paths'][modulepath]['get']['x-has-default-impl'] = True
@@ -388,7 +400,7 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
         model['definitions'][modulename]['properties']['name']['x-has-default-impl'] = True # TODO: now sure about this one
         model['definitions'][modulename]['properties']['name']['x-is-cube-name'] = True # TODO: now sure about this one
 
-        if modulepath + '{name}/ports/' in model['paths']:
+        if not transparent:
             model['definitions']['Ports']['properties']['name']['x-has-default-impl'] = True # TODO: now sure about this one
 
         # mark leafs that are part of the base datamodel
@@ -399,11 +411,13 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
         model['definitions'][modulename]['properties']['type']['x-is-base-datamodel'] = True
         model['definitions'][modulename]['properties']['loglevel']['x-is-base-datamodel'] = True
         model['definitions'][modulename]['properties']['service-name']['x-is-base-datamodel'] = True
-        model['definitions'][modulename]['properties']['shadow']['x-is-base-datamodel'] = True
-        model['definitions'][modulename]['properties']['span']['x-is-base-datamodel'] = True
+
+        if not transparent:
+            model['definitions'][modulename]['properties']['shadow']['x-is-base-datamodel'] = True
+            model['definitions'][modulename]['properties']['span']['x-is-base-datamodel'] = True
 
         # ports
-        if modulepath + '{name}/ports/' in model['paths']:
+        if not transparent:
             #model['definitions'][modulename]['properties']['ports']['x-is-base-datamodel'] = True # TODO: now sure about this one
             model['definitions'][modulename]['properties']['ports']['x-is-port-class'] = True
             #model['definitions']['Ports']['properties']['name']['x-is-base-datamodel'] = True # TODO: now sure about this one
@@ -419,26 +433,20 @@ def emit_swagger_spec(ctx, modules, fd, path, git_info):
         model['paths'][modulepath + '{name}/loglevel/']['get']['x-is-base-datamodel'] = True
         model['paths'][modulepath + '{name}/loglevel/']['patch']['x-is-base-datamodel'] = True
         model['paths'][modulepath + '{name}/service-name/']['get']['x-is-base-datamodel'] = True
-        model['paths'][modulepath + '{name}/shadow/']['get']['x-is-base-datamodel'] = True
-        model['paths'][modulepath + '{name}/span/']['get']['x-is-base-datamodel'] = True
-        model['paths'][modulepath + '{name}/span/']['patch']['x-is-base-datamodel'] = True
+
+        if not transparent:
+            model['paths'][modulepath + '{name}/shadow/']['get']['x-is-base-datamodel'] = True
+            model['paths'][modulepath + '{name}/span/']['get']['x-is-base-datamodel'] = True
+            model['paths'][modulepath + '{name}/span/']['patch']['x-is-base-datamodel'] = True
 
         # ports
-        if modulepath + '{name}/ports/' in model['paths']:
+        if not transparent:
             model['paths'][modulepath + '{name}/ports/{ports_name}/peer/']['patch']['x-is-base-datamodel'] = True
             model['paths'][modulepath + '{name}/ports/{ports_name}/peer/']['get']['x-is-base-datamodel'] = True
             model['paths'][modulepath + '{name}/ports/{ports_name}/uuid/']['get']['x-is-base-datamodel'] = True
             model['paths'][modulepath + '{name}/ports/{ports_name}/status/']['get']['x-is-base-datamodel'] = True
             # code generation is not genering endpoints for list leafs, to this call fails at this point
             #model['paths'][modulepath + '{name}/ports/{ports_name}/tcubes/']['get']['x-is-base-datamodel'] = True
-
-        # check if module is transparent or not
-        # TODO: I haven't been able to implement this in a clever way, for some
-        # reason I am not able to detect the "uses" statements in pyang
-        if modulepath + '{name}/ports/' in model['paths']:
-            model['definitions'][modulename]['x-is-standard'] = True
-        else:
-            model['definitions'][modulename]['x-is-transparent'] = True
 
         fd.write(json.dumps(model, indent=4, separators=(',', ': ')))
 
