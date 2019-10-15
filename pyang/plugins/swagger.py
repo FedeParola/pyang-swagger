@@ -559,7 +559,7 @@ def set_node_type_info(typedef, node):
                         node['maximum'] = int(maximum)
 
 
-def gen_model(children, tree_structure, config=True, definitions=None):
+def gen_model(children, tree_structure, config=True, definitions=dict()):
     """ Generates the swagger definition tree."""
     for child in children:
         referenced = False
