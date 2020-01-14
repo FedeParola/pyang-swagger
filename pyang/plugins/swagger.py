@@ -715,8 +715,14 @@ def gen_model(children, tree_structure, config=True, definitions=dict()):
             if required_elem_list:
                 definitions[node_schema_name]['required'] = copy.deepcopy(required_elem_list)
 
+            if 'description' in node:
+                description_copy = copy.deepcopy(node['description'])
+
             node.clear()
             node['$ref'] = '#/definitions/{0}'.format(node_schema_name)
+            if description_copy is not None:
+                node['description'] = description_copy
+
             definitions[node_schema_name]['x-parent'] = to_upper_camelcase(((child.parent.arg) if not parents_name else parents_name))
             tree_structure[to_lower_camelcase(child.arg)] = node
 
