@@ -717,6 +717,8 @@ def gen_model(children, tree_structure, config=True, definitions=dict()):
 
             if 'description' in node:
                 description_copy = copy.deepcopy(node['description'])
+            else:
+                description_copy = None
 
             node.clear()
             node['$ref'] = '#/definitions/{0}'.format(node_schema_name)
